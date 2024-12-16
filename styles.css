@@ -3,6 +3,26 @@
     --secondary-color: #2C3E50;
     --background-color: #F5F6FA;
     --text-color: #2C3E50;
+    --card-bg: white;
+    --code-bg: #1E1E1E;
+    --code-color: #D4D4D4;
+    --border-color: #ddd;
+}
+
+[data-theme="dark"] {
+    --primary-color: #64B5F6;
+    --secondary-color: #90CAF9;
+    --background-color: #1A1A1A;
+    --text-color: #E0E0E0;
+    --card-bg: #2D2D2D;
+    --code-bg: #000000;
+    --code-color: #E0E0E0;
+    --border-color: #404040;
+    --header-bg: #1E3A5F;
+    --nav-bg: #2D2D2D;
+    --footer-bg: #1E3A5F;
+    --comparison-item-bg: #2D2D2D;
+    --comparison-item-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 body {
@@ -12,17 +32,18 @@ body {
     padding: 0;
     background-color: var(--background-color);
     color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 header {
-    background-color: var(--primary-color);
+    background-color: var(--header-bg, var(--primary-color));
     color: white;
     padding: 2rem;
     text-align: center;
 }
 
 nav {
-    background-color: white;
+    background-color: var(--nav-bg, white);
     padding: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: sticky;
@@ -60,7 +81,7 @@ main {
 }
 
 section {
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -99,13 +120,13 @@ button:hover {
 footer {
     text-align: center;
     padding: 2rem;
-    background-color: var(--secondary-color);
+    background-color: var(--footer-bg, var(--secondary-color));
     color: white;
 }
 
 /* Add styles for the config form */
 .config-form {
-    background: white;
+    background: var(--card-bg);
     padding: 1rem;
     border-radius: 4px;
     margin-bottom: 1rem;
@@ -121,12 +142,14 @@ footer {
     font-weight: 500;
 }
 
-.form-group input {
+.form-group input, select {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
+    background-color: var(--card-bg);
+    color: var(--text-color);
 }
 
 /* Make code blocks editable */
@@ -241,10 +264,26 @@ section h2 a:hover {
 select {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
-    background-color: white;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0l6 6 6-6z" fill="%23666"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.7em top 50%;
+    background-size: 0.65em auto;
+    padding-right: 2rem;
+}
+
+[data-theme="dark"] select {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0l6 6 6-6z" fill="%23fff"/></svg>');
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 /* Payment Modal Styles */
@@ -347,10 +386,10 @@ select {
 }
 
 .comparison-item {
-    background: white;
+    background: var(--comparison-item-bg, white);
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--comparison-item-shadow, 0 2px 4px rgba(0,0,0,0.1));
 }
 
 .comparison-item h3 {
@@ -558,4 +597,22 @@ button.loading::after {
     padding: 0.5rem;
     border-radius: 4px;
     font-size: 0.9rem;
+} 
+
+/* Theme Toggle Button */
+#theme-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+#theme-toggle:hover {
+    transform: scale(1.1);
 } 

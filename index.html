@@ -14,6 +14,9 @@
     <script src="https://pay.nano.to/latest.js"></script>
     <!-- CryptoJS for WowPay signatures -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Highlight.js -->
+    <link href=" https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/monokai_sublime.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
     <header>
@@ -507,5 +510,6 @@ async function createInvoice(apiKey, paymentData) {
 
     <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
     <script src="scripts.js"></script>
+    <script>hljs.highlightAll();</script>
 </body>
 </html> 

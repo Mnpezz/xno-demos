@@ -116,51 +116,25 @@
                 <div class="code-editor">
                     <h4>Intermediate Implementation</h4>
                     <pre><code class="language-html" contenteditable="true">
-&lt;!-- Add the required Bitrequest resources -->
-&lt;link rel="stylesheet" href="https://bitrequest.github.io/assets_styles_lib_bitrequest.css"/>
-&lt;script src="https://bitrequest.github.io/assets_js_lib_bitrequest_checkout.js">&lt;/script>
-
 &lt;script>
 // Configuration for the payment request
-function createBitRequest(amount, title = "Payment Request") {
-    const payment = "nano"; // or "bitcoin" for Lightning Network
+function createBitRequest() {
+    const payment = "nano";
     const uoa = "usd";
-    const address = "YOUR_NANO_ADDRESS"; // Replace with your address
-
-    // Create the data object
-    const requestData = {
-        "t": title,
+    const amount = 0.05;
+    const address = "YOUR_NANO_ADDRESS";
+    const d = btoa(JSON.stringify({
+        "t": "Payment Request",
         "n": "Store Payment",
-        "c": 0,
-        "pid": 'pid_' + Math.random().toString(36).substr(2, 9)
-    };
-
-    // Encode the data
-    const d = btoa(JSON.stringify(requestData));
-
-    // Construct the request URL
-    return `https://bitrequest.github.io/?payment=${payment}&uoa=${uoa}&amount=${amount}&address=${address}&d=${d}`;
-}
-
-// Handle the callback when payment is received
-function result_callback(post_data) {
-    if (post_data.result.txdata.status === 'paid') {
-        // Handle successful payment
-        const amount = post_data.result.txdata.amount;
-        const txHash = post_data.result.txdata.txhash;
-        
-        console.log(`Payment of ${amount} received. Transaction hash: ${txHash}`);
-        // Add your payment handling logic here
-    }
+        "c": 0
+    }));
+    return "https://bitrequest.github.io/?payment=" + payment + "&uoa=" + uoa + "&amount=" + amount + "&address=" + address + "&d=" + d;
 }
 
 // Example usage
-const paymentUrl = createBitRequest(0.05, "Order #123");
+const paymentUrl = createBitRequest();
 window.location.href = paymentUrl;
 &lt;/script>
-
-&lt;!-- Optional: Add a checkout button -->
-&lt;a href="#" id="checkoutButton" class="br_checkout">Check out&lt;/a>
                     </code></pre>
                     <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
                 </div>
@@ -303,7 +277,7 @@ function payWithNanoTo() {
             </div>
 
             <div class="notice">
-                <p><strong>Note:</strong> WowPay requires API authentication. Get your test keys at <a href="https://pay.pilou.cc/apis" target="_blank">pay.pilou.cc/apis</a>.<br>This website is for demonstration purposes only - never expose production API keys in frontend code.</p>
+                <p><strong>Note:</strong> WowPay requires API authentication. Get your keys at <a href="https://pay.pilou.cc/apis" target="_blank">pay.pilou.cc/apis</a>.<br>This website is for demonstration purposes only - never expose production API keys in frontend code.</p>
             </div>
             
             <div class="demo">

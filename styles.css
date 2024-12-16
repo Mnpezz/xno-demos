@@ -37,6 +37,7 @@ nav ul {
     display: flex;
     justify-content: center;
     gap: 2rem;
+    flex-wrap: wrap;
 }
 
 nav a {
@@ -44,8 +45,7 @@ nav a {
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    white-space: nowrap;
 }
 
 nav a:hover,
@@ -530,4 +530,21 @@ button.loading::after {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+} 
+
+/* Mobile Navigation Styles */
+@media (max-width: 600px) {
+    nav {
+        padding: 1rem 0.5rem;
+    }
+
+    nav ul {
+        gap: 0.5rem;
+        justify-content: space-around;
+    }
+
+    nav a {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
 } 

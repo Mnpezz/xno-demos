@@ -5,6 +5,7 @@ function demoNanoTo() {
     const notify = document.getElementById('nanoto-notify').value;
     const showContact = document.getElementById('nanoto-contact').checked;
     const enableShipping = document.getElementById('nanoto-shipping').checked;
+    const shippingPrice = document.getElementById('nanoto-shipping-price').value;
     const currency = document.getElementById('nanoto-currency').value;
     const wallet = document.getElementById('nanoto-wallet').value;
 
@@ -14,12 +15,7 @@ function demoNanoTo() {
         amount: parseFloat(amount),
         notify: notify,
         contact: showContact,
-        shipping: enableShipping ? {
-            onShippingUpdate: function(details) {
-                console.log('Shipping details:', details);
-                return true;
-            }
-        } : false,
+        shipping: enableShipping ? parseFloat(shippingPrice) : false,
         currency: currency,
         wallet: wallet,
         button: `Open ${wallet.charAt(0).toUpperCase() + wallet.slice(1)}`,
@@ -289,8 +285,6 @@ function copyCodeExample(button) {
     });
 }
 
-// Add more demo functions for other payment methods 
-
 // Function to show payment modal
 function showPaymentModal(paymentDetails) {
     // Create modal container
@@ -407,4 +401,34 @@ document.getElementById('bitrequest-currency').addEventListener('change', functi
         warningElement?.remove();
         viewkeyElement?.remove();
     }
+});
+
+// Theme toggle functionality
+const themeToggle = document.getElementById('theme-toggle');
+
+function setTheme(isDark) {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    themeToggle.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+// Check for saved theme preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    setTheme(savedTheme === 'dark');
+} else {
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(prefersDark);
+}
+
+themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    setTheme(!isDark);
+});
+
+// Show/hide shipping price input
+document.getElementById('nanoto-shipping').addEventListener('change', function() {
+    const shippingPriceGroup = document.getElementById('shipping-price-group');
+    shippingPriceGroup.style.display = this.checked ? 'block' : 'none';
 });

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Payment Integration Guide</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- NanoPay.js -->
+    <script src="https://pay.nano.to/latest.js"></script>
+    <!-- CryptoJS for WowPay signatures -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Nano Payment Integration Guide</h1>
+        <p>A comprehensive guide to implementing Nano payments in your applications</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#nano-to">Nano.to</a></li>
+            <li><a href="#nanopay-me">NanoPay.me</a></li>
+            <li><a href="#bitrequest">BitRequest</a></li>
+            <li><a href="#wowpay">WowPay</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="intro">
+            <h2>Introduction</h2>
+            <p>This guide demonstrates different methods to accept Nano payments on your website. Each solution offers unique features and benefits to suit different use cases, from simple donations to full e-commerce integration.</p>
+        </section>
+
+        <section id="nano-to">
+            <h2><a href="https://pay.nano.to" target="_blank">Nano.to</a></h2>
+            <p>A modern, non-custodial payment solution that prioritizes user experience. Features a sleek Apple Pay-inspired interface, instant confirmations, and email notifications. Perfect for websites looking to accept Nano payments with minimal setup.</p>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <ul class="feature-list">
+                        <li class="feature-decentralized">Non-custodial solution</li>
+                        <li class="feature-easy">Simple Apple Pay-like interface</li>
+                        <li class="feature-integration">Easy frontend integration</li>
+                        <li class="feature-fee">No fees</li>
+                        <li class="feature-support">Email notifications</li>
+                        <li class="feature-form">Contact & shipping forms</li>
+                        <li class="feature-customize">Customizable UI & wallets</li>
+                        <li class="feature-currency">Multi-currency pricing</li>
+                        <li class="feature-cart">Shopping cart support</li>
+                        <li class="feature-limit">Best for: Quick payments and donations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="demo">
+                <h3>Live Demo</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="nanoto-address">Nano Address or Username:</label>
+                        <input type="text" id="nanoto-address" value="@development" placeholder="@username or nano_address">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanoto-amount">Amount (NANO):</label>
+                        <input type="number" id="nanoto-amount" value="0.1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanoto-notify">Notification Email (optional):</label>
+                        <input type="email" id="nanoto-notify" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Options:</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="nanoto-contact" checked>
+                            <label for="nanoto-contact">Request contact info</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="nanoto-shipping">
+                            <label for="nanoto-shipping">Enable shipping</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nanoto-currency">Currency:</label>
+                        <select id="nanoto-currency">
+                            <option value="">XNO</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nanoto-wallet">Preferred Wallet:</label>
+                        <select id="nanoto-wallet">
+                            <option value="natrium">Natrium</option>
+                            <option value="nault">Nault</option>
+                            <option value="nautilus">Nautilus</option>
+                            <option value="cake">Cake Wallet</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="demoNanoTo()">Pay with Nano.to</button>
+            </div>
+
+            <div class="code-example">
+                <h3>Implementation</h3>
+                <div class="code-editor">
+                <pre><code class="language-html" contenteditable="true">
+&lt;script src="https://pay.nano.to/latest.js">&lt;/script>
+
+&lt;button onclick="payWithNanoTo()"&gt;Pay Now&lt;/button&gt;
+
+&lt;script&gt;
+function payWithNanoTo() {
+    NanoPay.open({ 
+        title: "Demo Payment",
+        address: '@your-username', 
+        amount: 0.1,
+        notify: 'your@email.com',
+        contact: true,
+        shipping: {
+            onShippingUpdate: function(details) {
+                console.log('Shipping details:', details);
+                return true;
+            }
+        },
+        currency: 'USD',
+        wallet: 'natrium',
+        success: (block) => {
+            console.log('Payment successful!', {
+                hash: block.hash,
+                amount: block.amount,
+                email: block.email,
+                shipping: block.shipping
+            });
+        }
+    });
+}
+&lt;/script&gt;
+                </code></pre>
+                <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="nanopay-me">
+            <h2><a href="https://nanopay.me" target="_blank">NanoPay.me</a></h2>
+            <p>A feature-rich payment gateway with API support for creating and managing invoices.<br>"The Stripe of Nano Payments. Pay and get paid with Nano." </p>
+            <div class="comparison-grid">                
+                <div class="comparison-item">
+                    <ul class="feature-list">
+                        <li class="feature-api">Full-featured REST API</li>
+                        <li class="feature-webhook">Webhook support</li>
+                        <li class="feature-tracking">Payment tracking & management</li>
+                        <li class="feature-fee">Potential processing fees in the future</li>
+                        <li class="feature-support">Technical support available</li>
+                        <li class="feature-limit">Best for: E-commerce and business integration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="notice">
+                <p><strong>Note:</strong> Due to browser security restrictions (CORS), this demo may not work directly in the browser. For production use, implement the API calls through your backend server. See the <a href="https://nanopay.me/docs/api" target="_blank">API documentation</a> for details.</p>
+            </div>
+            
+            <div class="demo">
+                <h3>Live Demo</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="nanopay-api-key">API Key:</label>
+                        <input type="password" id="nanopay-api-key" placeholder="Your NanoPay.me API Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanopay-title">Payment Title:</label>
+                        <input type="text" id="nanopay-title" value="Demo Payment">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanopay-amount">Amount (NANO):</label>
+                        <input type="number" id="nanopay-amount" value="0.1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanopay-address">Recipient Address:</label>
+                        <input type="text" id="nanopay-address" placeholder="nano_1your2address3here...">
+                    </div>
+                    <div class="form-group">
+                        <label for="nanopay-redirect">Redirect URL (optional):</label>
+                        <input type="url" id="nanopay-redirect" placeholder="https://your-success-page.com">
+                    </div>
+                </div>
+                <button onclick="demoNanopayMe()">Create Invoice</button>
+            </div>
+
+            <div class="code-example">
+                <h3>Implementation Examples</h3>
+                <div class="code-editor">
+                    <h4>Simple Implementation</h4>
+                    <pre><code class="language-javascript" contenteditable="true">
+// Create payment URL and redirect
+function createNanoPayment(address, amount, title, redirectUrl) {
+    const params = new URLSearchParams({
+        address: address,
+        amount: amount
+    });
+    
+    if (title) params.append('title', title);
+    if (redirectUrl) params.append('redirect_url', redirectUrl);
+    
+    const paymentUrl = `https://nanopay.me/payment?${params}`;
+    window.location.href = paymentUrl;
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+                
+                <div class="code-editor">
+                    <h4>API Implementation (Backend Required)</h4>
+                    <pre><code class="language-javascript" contenteditable="true">
+// Server-side implementation example
+async function createInvoice(apiKey, paymentData) {
+    const response = await fetch('https://api.nanopay.me/invoices', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title: paymentData.title,
+            price: paymentData.amount,
+            recipient_address: paymentData.address,
+            redirect_url: paymentData.redirect_url
+        })
+    });
+ 
+    return await response.json();
+ }</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="bitrequest">
+            <h2><a href="https://bitrequest.github.io" target="_blank">BitRequest</a></h2>
+            <p>A simple, non-custodial solution for generating cryptocurrency payment request links.</p>
+            <div class="comparison-grid">                                
+                <div class="comparison-item">
+                    <ul class="feature-list">
+                        <li class="feature-decentralized">Fully decentralized</li>
+                        <li class="feature-crypto">Multi-cryptocurrency support</li>
+                        <li class="feature-easy">Simple URL-based requests</li>
+                        <li class="feature-fee">No fees</li>
+                        <li class="feature-form">Optional contact forms</li>
+                        <li class="feature-limit">Best for: Payment requests and invoicing</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="demo">
+                <h3>Live Demo</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="bitrequest-address">Nano Address:</label>
+                        <input type="text" id="bitrequest-address" placeholder="nano_1your2address3here...">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-amount">Amount (USD):</label>
+                        <input type="number" id="bitrequest-amount" value="1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-title">Request Title:</label>
+                        <input type="text" id="bitrequest-title" value="Demo Request">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-name">Receiver Name:</label>
+                        <input type="text" id="bitrequest-name" value="BitRequest Demo">
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Options:</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="bitrequest-contact" checked>
+                            <label for="bitrequest-contact">Show contact form</label>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="demoBitRequest()">Create Payment Request</button>
+            </div>
+
+            <div class="code-example">
+                <h3>Implementation</h3>
+                <div class="code-editor">
+                    <pre><code class="language-javascript" contenteditable="true">
+// Create BitRequest payment URL
+function createBitRequest(options) {
+    const baseUrl = 'https://bitrequest.github.io/';
+    
+    // Required parameters
+    const params = new URLSearchParams({
+        payment: 'nano',
+        uoa: 'usd',
+        amount: options.amount,
+        address: options.address
+    });
+    
+    // Optional data object
+    const data = {
+        n: options.receiverName,
+        t: options.title,
+        c: 0 // confirmations
+    };
+    
+    // Add encoded data
+    params.append('d', btoa(JSON.stringify(data)));
+    
+    // Add contact form if requested
+    if (options.showContact) {
+        params.append('contactform', 'true');
+    }
+    
+    return `${baseUrl}?${params.toString()}`;
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="wowpay">
+            <h2><a href="https://pay.pilou.cc" target="_blank">WowPay</a></h2>
+            <p>A managed payment solution supporting multiple cryptocurrencies including Nano, Banano, and more.</p>
+            <div class="comparison-grid">                                
+                <div class="comparison-item">
+                    <ul class="feature-list">
+                        <li class="feature-crypto">Multiple nano-fork support</li>
+                        <li class="feature-api">Comprehensive API</li>
+                        <li class="feature-custody">Custodial solution</li>
+                        <li class="feature-management">Balance & withdrawal management</li>
+                        <li class="feature-security">Secure signature-based auth</li>
+                        <li class="feature-limit">Best for: Multi-currency payment systems</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="notice">
+                <p><strong>Note:</strong> WowPay requires API authentication. Get your keys at <a href="https://pay.pilou.cc/apis" target="_blank">pay.pilou.cc/apis</a></p>
+            </div>
+            
+            <div class="demo">
+                <h3>Live Demo</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="wowpay-api-key">API Key:</label>
+                        <input type="password" id="wowpay-api-key" placeholder="Your WowPay API Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="wowpay-private-key">Private Key:</label>
+                        <input type="password" id="wowpay-private-key" placeholder="Your WowPay Private Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="wowpay-currency">Currency:</label>
+                        <select id="wowpay-currency">
+                            <option value="xno">Nano (XNO)</option>
+                            <option value="ban">Banano (BAN)</option>
+                            <option value="xdg">DogenanoX (XDG)</option>
+                            <option value="ana">Ananos (ANA)</option>
+                            <option value="wow">Wownero (WOW)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wowpay-amount">Amount:</label>
+                        <input type="number" id="wowpay-amount" value="0.1" step="0.1">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <div class="button-container">
+                        <button onclick="demoWowPayDeposit()">Create Deposit Address</button>
+                        <small class="button-info">Generate a unique address to receive payments</small>
+                    </div>
+                    <div class="button-container">
+                        <button onclick="demoWowPayWithdraw()">Create Withdrawal</button>
+                        <small class="button-info">Send funds from your WowPay balance to any address</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-example">
+                <h3>Implementation Examples</h3>
+                <div class="code-editor">
+                    <h4>Create Deposit Address</h4>
+                    <pre><code class="language-javascript" contenteditable="true">
+// Create a deposit address
+async function createDeposit(apiKey, privateKey, currency) {
+    const timestamp = Date.now();
+    const body = JSON.stringify({
+        currency: currency,
+        time: timestamp
+    });
+    
+    // Create signature
+    const signature = CryptoJS.HmacSHA256(body, privateKey).toString(CryptoJS.enc.Base64);
+    
+    const response = await fetch('https://nanpay.pilou.cc/wallet/deposit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'auth': apiKey,
+            'sign': signature
+        },
+        body: body
+    });
+    
+    const data = await response.json();
+    return data.address; // Returns managed deposit address
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+                
+                <div class="code-editor">
+                    <h4>Create Withdrawal</h4>
+                    <pre><code class="language-javascript" contenteditable="true">
+// Create a withdrawal
+async function createWithdrawal(apiKey, privateKey, currency, amount, destination) {
+    const timestamp = Date.now();
+    const body = JSON.stringify({
+        currency: currency,
+        time: timestamp,
+        amount: amount,
+        destination: destination
+    });
+    
+    // Create signature
+    const signature = CryptoJS.HmacSHA256(body, privateKey).toString(CryptoJS.enc.Base64);
+    
+    const response = await fetch('https://nanpay.pilou.cc/wallet/withdraw', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'auth': apiKey,
+            'sign': signature
+        },
+        body: body
+    });
+    
+    return await response.json();
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Created with ♥ for the Nano community</p>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html> 

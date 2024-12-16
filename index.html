@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nano Payment Integration Guide</title>
     <link rel="icon" type="image/png" href="favicon.ico">
-    <!-- Alternative formats if needed -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.ico">
@@ -23,8 +22,8 @@
 
     <nav>
         <ul>
-            <li><a href="#nano-to">Nano.to</a></li>
             <li><a href="#bitrequest">BitRequest</a></li>
+            <li><a href="#nano-to">Nano.to</a></li>
             <li><a href="#wowpay">WowPay</a></li>
             <li><a href="#nanopay-me">NanoPay.me</a></li>
         </ul>
@@ -36,7 +35,93 @@
             <p>This guide demonstrates different methods to accept Nano payments on your website. Each solution offers unique features and benefits to suit different use cases, from simple donations to full e-commerce integration.</p>
         </section>
 
-        <section id="nano-to">
+        
+
+        <section id="bitrequest">
+            <h2><a href="https://bitrequest.github.io" target="_blank">BitRequest</a></h2>
+            <p>A simple, non-custodial solution for generating cryptocurrency payment request links.</p>
+            <div class="comparison-grid">                                
+                <div class="comparison-item">
+                    <ul class="feature-list">
+                        <li class="feature-decentralized">Fully decentralized</li>
+                        <li class="feature-crypto">Multi-cryptocurrency support</li>
+                        <li class="feature-easy">Simple URL-based requests</li>
+                        <li class="feature-fee">No fees</li>
+                        <li class="feature-form">Optional contact forms</li>
+                        <li class="feature-limit">Best for: Payment requests and invoicing</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="demo">
+                <h3>Live Demo</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="bitrequest-address">Nano Address:</label>
+                        <input type="text" id="bitrequest-address" placeholder="nano_1your2address3here...">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-amount">Amount (USD):</label>
+                        <input type="number" id="bitrequest-amount" value="1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-title">Request Title:</label>
+                        <input type="text" id="bitrequest-title" value="Demo Request">
+                    </div>
+                    <div class="form-group">
+                        <label for="bitrequest-name">Receiver Name:</label>
+                        <input type="text" id="bitrequest-name" value="BitRequest Demo">
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Options:</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="bitrequest-contact" checked>
+                            <label for="bitrequest-contact">Show contact form</label>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="demoBitRequest()">Create Payment Request</button>
+            </div>
+
+            <div class="code-example">
+                <h3>Implementation</h3>
+                <div class="code-editor">
+                    <pre><code class="language-javascript" contenteditable="true">
+// Create BitRequest payment URL
+function createBitRequest(options) {
+    const baseUrl = 'https://bitrequest.github.io/';
+    
+    // Required parameters
+    const params = new URLSearchParams({
+        payment: 'nano',
+        uoa: 'usd',
+        amount: options.amount,
+        address: options.address
+    });
+    
+    // Optional data object
+    const data = {
+        n: options.receiverName,
+        t: options.title,
+        c: 0 // confirmations
+    };
+    
+    // Add encoded data
+    params.append('d', btoa(JSON.stringify(data)));
+    
+    // Add contact form if requested
+    if (options.showContact) {
+        params.append('contactform', 'true');
+    }
+    
+    return `${baseUrl}?${params.toString()}`;
+}</code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="nano-to"></section>
             <h2><a href="https://pay.nano.to" target="_blank">Nano.to</a></h2>
             <p>A modern, non-custodial payment solution that prioritizes user experience. Features a sleek Apple Pay-inspired interface, instant confirmations, and email notifications. Perfect for websites looking to accept Nano payments with minimal setup.</p>
             <div class="comparison-grid">
@@ -141,90 +226,6 @@ function payWithNanoTo() {
 &lt;/script&gt;
                 </code></pre>
                 <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="bitrequest">
-            <h2><a href="https://bitrequest.github.io" target="_blank">BitRequest</a></h2>
-            <p>A simple, non-custodial solution for generating cryptocurrency payment request links.</p>
-            <div class="comparison-grid">                                
-                <div class="comparison-item">
-                    <ul class="feature-list">
-                        <li class="feature-decentralized">Fully decentralized</li>
-                        <li class="feature-crypto">Multi-cryptocurrency support</li>
-                        <li class="feature-easy">Simple URL-based requests</li>
-                        <li class="feature-fee">No fees</li>
-                        <li class="feature-form">Optional contact forms</li>
-                        <li class="feature-limit">Best for: Payment requests and invoicing</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="demo">
-                <h3>Live Demo</h3>
-                <div class="config-form">
-                    <div class="form-group">
-                        <label for="bitrequest-address">Nano Address:</label>
-                        <input type="text" id="bitrequest-address" placeholder="nano_1your2address3here...">
-                    </div>
-                    <div class="form-group">
-                        <label for="bitrequest-amount">Amount (USD):</label>
-                        <input type="number" id="bitrequest-amount" value="1" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="bitrequest-title">Request Title:</label>
-                        <input type="text" id="bitrequest-title" value="Demo Request">
-                    </div>
-                    <div class="form-group">
-                        <label for="bitrequest-name">Receiver Name:</label>
-                        <input type="text" id="bitrequest-name" value="BitRequest Demo">
-                    </div>
-                    <div class="form-group">
-                        <label>Additional Options:</label>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="bitrequest-contact" checked>
-                            <label for="bitrequest-contact">Show contact form</label>
-                        </div>
-                    </div>
-                </div>
-                <button onclick="demoBitRequest()">Create Payment Request</button>
-            </div>
-
-            <div class="code-example">
-                <h3>Implementation</h3>
-                <div class="code-editor">
-                    <pre><code class="language-javascript" contenteditable="true">
-// Create BitRequest payment URL
-function createBitRequest(options) {
-    const baseUrl = 'https://bitrequest.github.io/';
-    
-    // Required parameters
-    const params = new URLSearchParams({
-        payment: 'nano',
-        uoa: 'usd',
-        amount: options.amount,
-        address: options.address
-    });
-    
-    // Optional data object
-    const data = {
-        n: options.receiverName,
-        t: options.title,
-        c: 0 // confirmations
-    };
-    
-    // Add encoded data
-    params.append('d', btoa(JSON.stringify(data)));
-    
-    // Add contact form if requested
-    if (options.showContact) {
-        params.append('contactform', 'true');
-    }
-    
-    return `${baseUrl}?${params.toString()}`;
-}</code></pre>
-                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
                 </div>
             </div>
         </section>

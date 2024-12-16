@@ -548,3 +548,14 @@ button.loading::after {
         padding: 0.5rem;
     }
 } 
+
+/* Monero Warning */
+#monero-warning {
+    margin-top: 0.5rem;
+    background-color: #FFF3CD;
+    border: 1px solid #FFEEBA;
+    color: #856404;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+} 

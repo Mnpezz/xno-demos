@@ -92,12 +92,14 @@ function demoBitRequest() {
     const data = {
         n: name,
         t: title,
-        c: 0
+        c: 0,
+        vk: document.getElementById('monero-viewkey')?.value
     };
     
     // Build URL with parameters
     const params = new URLSearchParams({
-        payment: 'nano',
+        p: 'home',
+        payment: getCryptoName(document.getElementById('bitrequest-currency').value),
         uoa: 'usd',
         amount: amount,
         address: address,
@@ -111,6 +113,19 @@ function demoBitRequest() {
     // Redirect to BitRequest
     const url = `https://bitrequest.github.io/?${params.toString()}`;
     window.location.href = url;
+}
+
+// Helper function to get correct cryptocurrency name
+function getCryptoName(currency) {
+    const cryptoMap = {
+        'btc': 'bitcoin',
+        'nano': 'nano',
+        'ltc': 'litecoin',
+        'xmr': 'monero',
+        'eth': 'ethereum',
+        'bch': 'bitcoincash'
+    };
+    return cryptoMap[currency] || currency;
 }
 
 // WowPay demo functions
@@ -351,4 +366,45 @@ window.addEventListener('scroll', function() {
             link.classList.add('active');
         }
     });
+});
+
+// Update address label based on selected currency
+document.getElementById('bitrequest-currency').addEventListener('change', function() {
+    const currencyLabels = {
+        'nano': 'Nano',
+        'btc': 'Bitcoin',
+        'ltc': 'Litecoin',
+        'xmr': 'Monero',
+        'eth': 'Ethereum',
+        'bch': 'Bitcoin Cash'
+    };
+    const selectedCurrency = currencyLabels[this.value] || this.value.toUpperCase();
+    document.getElementById('bitrequest-address-label').textContent = `${selectedCurrency} Address:`;
+    
+    // Show/hide Monero warning
+    const warningElement = document.getElementById('monero-warning');
+    const viewkeyElement = document.getElementById('monero-viewkey-group');
+    
+    if (this.value === 'xmr') {
+        if (!warningElement) {
+            const warning = document.createElement('div');
+            warning.id = 'monero-warning';
+            warning.className = 'notice';
+            warning.innerHTML = '<strong>Note:</strong> For automatic Monero payment monitoring, you can provide a view key. Without it, payment status will need to be updated manually.';
+            this.parentElement.appendChild(warning);
+        }
+        if (!viewkeyElement) {
+            const viewkeyGroup = document.createElement('div');
+            viewkeyGroup.id = 'monero-viewkey-group';
+            viewkeyGroup.className = 'form-group';
+            viewkeyGroup.innerHTML = `
+                <label for="monero-viewkey">Monero View Key (optional):</label>
+                <input type="text" id="monero-viewkey" placeholder="Enter your Monero view key">
+            `;
+            this.parentElement.appendChild(viewkeyGroup);
+        }
+    } else {
+        warningElement?.remove();
+        viewkeyElement?.remove();
+    }
 });

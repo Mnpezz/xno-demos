@@ -99,16 +99,55 @@
             <div class="code-example">
                 <h3>Implementation</h3>
                 <div class="code-editor">
+                    <h4>Simple Link</h4>
                     <pre><code class="language-html" contenteditable="true">
 <!-- Simple BitRequest Payment Link -->
 &lt;a href="https://bitrequest.github.io/?p=home&payment=nano&amount=1&address=YOUR_NANO_ADDRESS"&gt;
     Pay 1 USD in Nano
 &lt;/a&gt;
+                    </code></pre>
+                    <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
+                </div>
+                
+                <div class="code-editor">
+                    <h4>Advanced Implementation</h4>
+                    <pre><code class="language-html" contenteditable="true">
+&lt;script&gt;
+function createBitRequest(options) {
+    // Payment data
+    const data = {
+        n: options.name || 'My Store',      // Merchant name
+        t: options.title || 'Payment',      // Payment title
+        c: 0,                               // Confirmations
+        webhook: options.webhook            // Optional webhook URL
+    };
+    
+    // Build URL parameters
+    const params = new URLSearchParams({
+        p: 'home',
+        payment: options.currency || 'nano',
+        uoa: 'usd',
+        amount: options.amount,
+        address: options.address,
+        d: btoa(JSON.stringify(data)),
+        contactform: options.showContact ? 'true' : undefined
+    });
+    
+    // Redirect to BitRequest
+    window.location.href = `https://bitrequest.github.io/?${params}`;
+}
 
-<!-- With Contact Form -->
-&lt;a href="https://bitrequest.github.io/?p=home&payment=nano&amount=1&address=YOUR_NANO_ADDRESS&contactform=true"&gt;
-    Pay 1 USD in Nano (with contact form)
-&lt;/a&gt;
+// Example usage
+createBitRequest({
+    currency: 'nano',
+    amount: '10',
+    address: 'YOUR_NANO_ADDRESS',
+    name: 'My Store',
+    title: 'Order #123',
+    showContact: true,
+    webhook: 'https://your-server.com/webhook'  // Handle form data
+});
+&lt;/script&gt;
                     </code></pre>
                     <button class="copy-code-btn" onclick="copyCodeExample(this)">Copy Code</button>
                 </div>

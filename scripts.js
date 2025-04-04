@@ -440,8 +440,8 @@ function demoSplitRoute() {
     const primaryAddress = document.getElementById('splitroute-primary-address').value;
     const enableSplit = document.getElementById('splitroute-enable-split').checked;
     
-    if (!apiKey || !primaryAddress) {
-        alert('Please enter your API key and primary recipient address');
+    if (!primaryAddress) {
+        alert('Please enter a primary recipient address');
         return;
     }
     
@@ -499,13 +499,19 @@ function demoSplitRoute() {
         }
     }
     
+    // Prepare headers - include API key only if provided
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    if (apiKey) {
+        headers['X-API-Key'] = apiKey;
+    }
+    
     // Make API request
     fetch('https://api.splitroute.com/api/v1/invoices', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': apiKey
-        },
+        headers: headers,
         body: JSON.stringify(requestData)
     })
     .then(response => response.json())

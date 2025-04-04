@@ -495,15 +495,15 @@ async function createInvoice(apiKey, paymentData) {
             </div>
 
             <div class="notice">
-                <p><strong>Note:</strong> SplitRoute requires API authentication. Get your test keys at <a href="https://console.splitroute.com/dashboard/user" target="_blank">splitroute.com</a>. For demonstration purposes only - never expose production API keys in frontend code.</p>
+                <p><strong>Note:</strong> SplitRoute offers a free tier without API authentication with limited rate limits. For higher limits and additional features, get your API keys at <a href="https://api.splitroute.com/api/v1/api-keys/register" target="_blank">api.splitroute.com</a>. For demonstration purposes only - never expose production API keys in frontend code.</p>
             </div>
             
             <div class="demo">
                 <h3>Live Demo</h3>
                 <div class="config-form">
                     <div class="form-group">
-                        <label for="splitroute-api-key">API Key:</label>
-                        <input type="password" id="splitroute-api-key" placeholder="Your SplitRoute API Key">
+                        <label for="splitroute-api-key">API Key (optional):</label>
+                        <input type="password" id="splitroute-api-key" placeholder="Your SplitRoute API Key (optional for basic use)">
                     </div>
                     <div class="form-group">
                         <label for="splitroute-amount">Amount (USD):</label>

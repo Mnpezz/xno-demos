@@ -432,3 +432,318 @@ document.getElementById('nanoto-shipping').addEventListener('change', function()
     const shippingPriceGroup = document.getElementById('shipping-price-group');
     shippingPriceGroup.style.display = this.checked ? 'block' : 'none';
 });
+
+// SplitRoute demo function
+function demoSplitRoute() {
+    const apiKey = document.getElementById('splitroute-api-key').value;
+    const amount = document.getElementById('splitroute-amount').value;
+    const primaryAddress = document.getElementById('splitroute-primary-address').value;
+    const enableSplit = document.getElementById('splitroute-enable-split').checked;
+    
+    if (!apiKey || !primaryAddress) {
+        alert('Please enter your API key and primary recipient address');
+        return;
+    }
+    
+    // Show loading state
+    const button = document.querySelector('button[onclick="demoSplitRoute()"]');
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // Prepare request data
+    let requestData = {
+        nominal_amount: parseFloat(amount),
+        nominal_currency: 'USD',
+        destinations: [
+            {
+                account: primaryAddress,
+                primary: true,
+                description: "Main recipient"
+            }
+        ],
+        show_qr: true,
+        reference: "Demo payment from Nano Integration Guide"
+    };
+    
+    // Add partner destinations if split payments are enabled
+    if (enableSplit) {
+        const recipientEntries = document.querySelectorAll('.recipient-entry');
+        let totalPercentage = 0;
+        
+        recipientEntries.forEach(entry => {
+            const partnerAddress = entry.querySelector('.partner-address').value;
+            const partnerPercentage = parseFloat(entry.querySelector('.partner-percentage').value);
+            
+            if (partnerAddress && !isNaN(partnerPercentage)) {
+                totalPercentage += partnerPercentage;
+                requestData.destinations.push({
+                    account: partnerAddress,
+                    percentage: partnerPercentage,
+                    description: `Partner fee (${partnerPercentage}%)`
+                });
+            }
+        });
+        
+        if (totalPercentage >= 100) {
+            alert('Total percentage cannot exceed 100%');
+            button.classList.remove('loading');
+            button.disabled = false;
+            return;
+        }
+        
+        if (requestData.destinations.length === 1) {
+            alert('Please enter at least one partner address for split payments');
+            button.classList.remove('loading');
+            button.disabled = false;
+            return;
+        }
+    }
+    
+    // Make API request
+    fetch('https://api.splitroute.com/api/v1/invoices', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': apiKey
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(invoice => {
+        button.classList.remove('loading');
+        button.disabled = false;
+        
+        if (invoice.error) {
+            throw new Error(invoice.error || 'Unknown error');
+        }
+        
+        // Create a payment modal instead of redirecting
+        createPaymentModal(invoice);
+        
+        // Set up WebSocket for real-time updates
+        if (invoice.invoice_id) {
+            const socket = monitorPayment(invoice.invoice_id);
+            window.currentSplitRouteSocket = socket;
+        }
+    })
+    .catch(error => {
+        button.classList.remove('loading');
+        button.disabled = false;
+        alert('Error creating invoice: ' + error.message);
+    });
+}
+
+// Create a payment modal for SplitRoute
+function createPaymentModal(invoice) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('splitroute-payment-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div id="splitroute-payment-modal" class="payment-modal">
+            <div class="payment-modal-content">
+                <span class="payment-modal-close">&times;</span>
+                <h3>Pay with Nano</h3>
+                <div class="payment-details">
+                    <p><strong>Amount:</strong> ${invoice.required.formatted_amount} XNO</p>
+                    <p><strong>Address:</strong> ${invoice.account_address}</p>
+                    <div class="payment-qr">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(invoice.uri_nano)}" alt="Payment QR Code">
+                    </div>
+                    <div class="payment-actions">
+                        <button class="copy-address" data-address="${invoice.account_address}">Copy Address</button>
+                        <button class="copy-amount" data-amount="${invoice.required.formatted_amount}">Copy Amount</button>
+                        <button class="open-wallet" data-uri="${invoice.uri_nano}">Open Wallet</button>
+                    </div>
+                    <div class="payment-status">
+                        <p id="payment-status-message">Waiting for payment...</p>
+                    </div>
+                    <div class="payment-destinations">
+                        <h4>Payment Distribution:</h4>
+                        <ul>
+                            ${invoice.destinations.map(dest => `
+                                <li>
+                                    <strong>${dest.description || (dest.type === 'primary' ? 'Primary Recipient' : dest.type)}:</strong> 
+                                    ${dest.formatted_amount} XNO
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to the page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Get modal elements
+    const modal = document.getElementById('splitroute-payment-modal');
+    const closeBtn = modal.querySelector('.payment-modal-close');
+    const copyAddressBtn = modal.querySelector('.copy-address');
+    const copyAmountBtn = modal.querySelector('.copy-amount');
+    const openWalletBtn = modal.querySelector('.open-wallet');
+    
+    // Show the modal
+    modal.style.display = 'block';
+    
+    // Close modal when clicking the close button
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+        // Close WebSocket if open
+        if (window.currentSplitRouteSocket) {
+            window.currentSplitRouteSocket.close();
+        }
+    };
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            // Close WebSocket if open
+            if (window.currentSplitRouteSocket) {
+                window.currentSplitRouteSocket.close();
+            }
+        }
+    };
+    
+    // Copy address to clipboard
+    copyAddressBtn.onclick = function() {
+        const address = this.getAttribute('data-address');
+        navigator.clipboard.writeText(address).then(() => {
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+                this.textContent = 'Copy Address';
+            }, 2000);
+        });
+    };
+    
+    // Copy amount to clipboard
+    copyAmountBtn.onclick = function() {
+        const amount = this.getAttribute('data-amount');
+        navigator.clipboard.writeText(amount).then(() => {
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+                this.textContent = 'Copy Amount';
+            }, 2000);
+        });
+    };
+    
+    // Open wallet
+    openWalletBtn.onclick = function() {
+        const uri = this.getAttribute('data-uri');
+        window.location.href = uri;
+    };
+}
+
+// Monitor payment status with WebSocket
+function monitorPayment(invoiceId) {
+    const wsUrl = `wss://api.splitroute.com/api/v1/ws/invoices/${invoiceId}`;
+    const socket = new WebSocket(wsUrl);
+    
+    socket.onopen = function(e) {
+        console.log('Connected to SplitRoute WebSocket');
+    };
+    
+    socket.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        console.log('WebSocket message:', message);
+        
+        const statusElement = document.getElementById('payment-status-message');
+        if (!statusElement) return;
+        
+        // Handle different event types
+        if (message.payload && message.payload.event_type) {
+            switch(message.payload.event_type) {
+                case 'payment.confirmed':
+                    statusElement.textContent = 'Payment detected! Processing...';
+                    statusElement.className = 'status-pending';
+                    break;
+                case 'invoice.paid':
+                    statusElement.textContent = 'Payment received! Processing...';
+                    statusElement.className = 'status-received';
+                    break;
+                case 'invoice.forwarded':
+                    statusElement.textContent = 'Payment forwarded to recipients!';
+                    statusElement.className = 'status-forwarded';
+                    break;
+                case 'invoice.done':
+                    statusElement.textContent = 'Payment completed!';
+                    statusElement.className = 'status-completed';
+                    break;
+                case 'invoice.expired':
+                    statusElement.textContent = 'Payment request expired.';
+                    statusElement.className = 'status-expired';
+                    break;
+            }
+        }
+        
+        // Check for completion category
+        if (message.category === 'completed') {
+            console.log('Invoice processing completed');
+            setTimeout(() => {
+                const modal = document.getElementById('splitroute-payment-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }, 3000);
+            socket.close();
+        }
+    };
+    
+    socket.onclose = function(event) {
+        console.log('WebSocket connection closed');
+    };
+    
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+        const statusElement = document.getElementById('payment-status-message');
+        if (statusElement) {
+            statusElement.textContent = 'Error connecting to payment service.';
+            statusElement.className = 'status-error';
+        }
+    };
+    
+    return socket;
+}
+
+// Toggle display of split payment options
+document.addEventListener('DOMContentLoaded', function() {
+    const splitCheckbox = document.getElementById('splitroute-enable-split');
+    const addRecipientBtn = document.getElementById('add-recipient');
+    
+    if (splitCheckbox) {
+        splitCheckbox.addEventListener('change', function() {
+            const splitOptions = document.getElementById('splitroute-split-options');
+            splitOptions.style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    
+    if (addRecipientBtn) {
+        addRecipientBtn.addEventListener('click', function() {
+            const recipientsContainer = document.getElementById('splitroute-recipients');
+            const newRecipient = document.createElement('div');
+            newRecipient.className = 'recipient-entry';
+            newRecipient.innerHTML = `
+                <div class="form-group">
+                    <label>Partner Address:</label>
+                    <input type="text" class="partner-address" placeholder="nano_1partner2address3here...">
+                </div>
+                <div class="form-group">
+                    <label>Partner Percentage:</label>
+                    <input type="number" class="partner-percentage" value="10" min="1" max="99">
+                </div>
+                <button type="button" class="remove-recipient">Remove</button>
+            `;
+            recipientsContainer.appendChild(newRecipient);
+            
+            // Add event listener to the remove button
+            newRecipient.querySelector('.remove-recipient').addEventListener('click', function() {
+                recipientsContainer.removeChild(newRecipient);
+            });
+        });
+    }
+});
